@@ -20,8 +20,10 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @UIScope
 @SpringComponent
@@ -87,34 +89,36 @@ public class HomePageView extends BaseView<HomePagePresenter> {
            }
         });
 
-        List<Message> senderMessage = new ArrayList<>();
-        List<Message> receiverMessages = new ArrayList<>();
+        List<Messages> allMessages = homePagePresenter.getAllMessages();
+        List<Message> messageList = new ArrayList<>();
 
-        senderMessage.add(new Message("Hi", "SK", "Sharad Kodag", true));
-        senderMessage.add(new Message("Hi", "VN", "Vishal Naik", false));
-        senderMessage.add(new Message("Hi", "SB", "Shivani Bansal", false));
-        senderMessage.add(new Message("Hi", "SK", "Ganesh Sangle", false));
-        senderMessage.add(new Message("Hi", "WS", "Waseem Shaikh", false));
+//        messageList.add(new Message("Hi", "SK", "Sharad Kodag", true));
+//        messageList.add(new Message("Hi", "VN", "Vishal Naik", false));
+//        messageList.add(new Message("Hi", "SB", "Shivani Bansal", false));
+//        messageList.add(new Message("Hi", "SK", "Ganesh Sangle", false));
+//        messageList.add(new Message("Hi", "WS", "Waseem Shaikh", false));
+
+        for(Messages messages : allMessages){
+            if(messages.getSender().getId().equals(4) || messages.getReceiver().equals(4))
+            messageList.add(new Message(messages.getMessage(), String.valueOf(messages.getReceiver().getFirstName().charAt(0)) + messages.getReceiver().getLastName().charAt(0),
+                    messages.getSender().getFirstName() + " " + messages.getSender().getLastName(),messages.getSender().getId().equals(4) ));
+        }
 
         Chat chat = new Chat();
         chat.getElement().getStyle().set("width","100%").set("height","100%");
         chat.setLoading(false);
         chat.scrollToBottom();
-        chat.setMessages(senderMessage);
-        chat.setDebouncePeriod(100);
+        chat.setMessages(messageList);
+        chat.setDebouncePeriod(200);
+        chat.setLazyLoadTriggerOffset(1000);
 //        chat.addLazyLoadTriggerEvent(2500);
 
         chat.addChatNewMessageListener(event -> {
-            senderMessage.add(new Message(event.getMessage(), "SK", "Sharad Kodag", true));
+            messageList.add(new Message(event.getMessage(), "SK", "Sharad Kodag", true));
             chat.addNewMessage(new Message(event.getMessage(), "SK", "Sharad Kodag", true));
-
-//            chat.setMessages(senderMessage);
+//            chat.setMessages(messageList);
             chat.scrollToBottom();
         });
-
-        MessageListItem m = new MessageListItem("Hi");
-
-        MessageList messageList = new MessageList();
 
         verticalLayout2.add(chat);
         verticalLayout1.add(textField, userGrid);

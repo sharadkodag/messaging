@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -19,6 +20,7 @@ public class Messages {
     @GeneratedValue(generator = "sr", strategy = GenerationType.SEQUENCE)
     private Integer id;
     private String message;
+    private LocalDateTime dateTime;
     @ManyToOne
     private User sender;
     @ManyToOne
