@@ -8,8 +8,10 @@ import java.util.List;
 public interface UserService {
 
     public List<User> getUserList();
+    public User getUser(Integer id);
     public void addUser(User user);
+    public void removeUser(Integer id);
 
-    public List<Messages> getAllMessages();
+
 
 }

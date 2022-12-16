@@ -25,4 +25,11 @@ public class Messages {
     private User sender;
     @ManyToOne
     private User receiver;
+
+    public Messages(String message, LocalDateTime dateTime, User sender, User receiver){
+        this.message = message;
+        this.dateTime = dateTime;
+        this.sender = sender;
+        this.receiver = receiver;
+    }
 }

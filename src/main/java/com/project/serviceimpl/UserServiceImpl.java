@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -21,12 +22,19 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
+    @Override
+    public User getUser(Integer id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
     public void addUser(User user) {
         userRepository.save(user);
     }
 
-    public List<Messages> getAllMessages() {
-        return messagesRepository.findAll();
+    @Override
+    public void removeUser(Integer id) {
+
+        userRepository.delete(Objects.requireNonNull(userRepository.findById(id).orElse(null)));
     }
 
 

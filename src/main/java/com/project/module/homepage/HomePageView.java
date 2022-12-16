@@ -16,13 +16,16 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @UIScope
@@ -32,12 +35,37 @@ public class HomePageView extends BaseView<HomePagePresenter> {
 
     @Autowired
     HomePagePresenter homePagePresenter;
+    User user;
+    List<Messages> allMessages;
+    List<Message> messageList1 ;
+    HorizontalLayout horizontalLayout;
+    VerticalLayout verticalLayout1;
+    VerticalLayout verticalLayout2;
+    TextField textField = new TextField();
+    Grid<User> userGrid = new Grid<>();
 
     @Override
     protected void init() {
+
+        horizontalLayout = new HorizontalLayout();
+        verticalLayout1 = new VerticalLayout();
+        verticalLayout2 = new VerticalLayout();
+
+        VaadinSession.getCurrent().setAttribute("User", homePagePresenter.getUser(1));
+        user = (User)VaadinSession.getCurrent().getAttribute("User");
+        allMessages = homePagePresenter.getAllMessages();
+        messageList1 = new ArrayList<>();
+        if(user!=null) {
+            System.out.println(user.getFirstName());
+        }
+
         setPadding(false);
         setMargin(false);
         setSizeFull();
+        horizontalLayout.setSizeFull();
+        verticalLayout1.setHeightFull();
+        verticalLayout1.setWidth(25, Unit.PERCENTAGE);
+        verticalLayout2.setSizeFull();
 
         add(addHeading());
         add(addContactsLayout());
@@ -57,20 +85,10 @@ public class HomePageView extends BaseView<HomePagePresenter> {
     }
 
     public HorizontalLayout addContactsLayout(){
-        HorizontalLayout horizontalLayout = new HorizontalLayout();
-        VerticalLayout verticalLayout1 = new VerticalLayout();
-        VerticalLayout verticalLayout2 = new VerticalLayout();
-        TextField textField = new TextField();
-        Grid<User> userGrid = new Grid<>();
 
-        horizontalLayout.setSizeFull();
-        verticalLayout1.setHeightFull();
-        verticalLayout1.setWidth(25, Unit.PERCENTAGE);
-        verticalLayout2.setSizeFull();
         textField.setValueChangeMode(ValueChangeMode.LAZY);
         textField.setWidthFull();
         textField.setPlaceholder("Search");
-//        userGrid.setSizeFull();
 
         List<User> userList = homePagePresenter.getAllUser();
         userGrid.setItems(userList);
@@ -81,16 +99,46 @@ public class HomePageView extends BaseView<HomePagePresenter> {
             dataProvider.addFilter(e -> (e.getFirstName().toLowerCase() + " " + e.getLastName().toLowerCase()).contains(textField.getValue().toLowerCase()));
         });
 
-        userGrid.addSelectionListener(event -> {
-           if(event.getAllSelectedItems().size()>0){
-               onGridItemSelection(verticalLayout2, event.getFirstSelectedItem().orElse(null));
-           }else {
-               verticalLayout2.removeAll();
-           }
-        });
+//        List<Message> messageList = allMessages.stream().filter(m -> m.getSender().getId().equals(user.getId()) || m.getReceiver().getId().equals(user.getId()))
+//                .map(m -> new Message(m.getMessage(),m.getSender().getFirstName(),
+//                        m.getSender().getFirstName() + " " + m.getSender().getLastName(), m.getReceiver().getId().equals(4))).collect(Collectors.toList());
 
-        List<Messages> allMessages = homePagePresenter.getAllMessages();
-        List<Message> messageList = new ArrayList<>();
+//        Chat chat = new Chat();
+//        chat.getElement().getStyle().set("width","100%").set("height","100%");
+//
+//        chat.scrollToBottom();
+//        chat.setDebouncePeriod(200);
+//        chat.setLazyLoadTriggerOffset(1000);
+//
+
+//        userGrid.addSelectionListener(event -> {
+//            verticalLayout2.add(chat);
+//            messageList1.clear();
+//            allMessages.clear();
+//            chat.getMessages().clear();
+//            allMessages = homePagePresenter.getAllMessages();
+//            messageList1 = allMessages.stream().filter(m -> m.getSender().getId().equals(user.getId()) && m.getReceiver().getId().equals(event.getFirstSelectedItem().orElse(null).getId()))
+//                    .map(m -> new Message(m.getMessage(),m.getSender().getFirstName(),
+//                            m.getSender().getFirstName() + " " + m.getSender().getLastName(), m.getReceiver().getId().equals(event.getFirstSelectedItem().orElse(null).getId()))).collect(Collectors.toList());
+//            chat.setMessages(messageList1);
+//        });
+
+//        chat.addLazyLoadTriggerEvent(event -> {
+//
+//        });
+//        chat.addChatNewMessageListener(evt -> {
+//            Message message = new Message(evt.getMessage(), user.getFirstName(), user.getFirstName() + " " + user.getLastName(), true);
+//            messageList1.add(message);
+//            Messages messages = new Messages(evt.getMessage(), LocalDateTime.now(), user,
+//                    userGrid.getSelectedItems().iterator().next());
+//            homePagePresenter.addMessage(messages);
+//            allMessages.add(messages);
+////            chat.addNewMessage(new Message(event.getMessage(), "SK", "Sharad Kodag", true));
+////            chat.addNewMessage(message);
+//            chat.setMessages(messageList1);
+//            evt.getSource().clearInput();
+//            chat.scrollToBottom();
+//        });
 
 //        messageList.add(new Message("Hi", "SK", "Sharad Kodag", true));
 //        messageList.add(new Message("Hi", "VN", "Vishal Naik", false));
@@ -98,42 +146,14 @@ public class HomePageView extends BaseView<HomePagePresenter> {
 //        messageList.add(new Message("Hi", "SK", "Ganesh Sangle", false));
 //        messageList.add(new Message("Hi", "WS", "Waseem Shaikh", false));
 
-        for(Messages messages : allMessages){
-            if(messages.getSender().getId().equals(4) || messages.getReceiver().equals(4))
-            messageList.add(new Message(messages.getMessage(), String.valueOf(messages.getReceiver().getFirstName().charAt(0)) + messages.getReceiver().getLastName().charAt(0),
-                    messages.getSender().getFirstName() + " " + messages.getSender().getLastName(),messages.getSender().getId().equals(4) ));
-        }
+//        for(Messages messages : allMessages){
+//            if(messages.getSender().getId().equals(4) || messages.getReceiver().equals(4))
+//            messageList.add(new Message(messages.getMessage(), String.valueOf(messages.getReceiver().getFirstName().charAt(0)) + messages.getReceiver().getLastName().charAt(0),
+//                    messages.getSender().getFirstName() + " " + messages.getSender().getLastName(),messages.getSender().getId().equals(4) ));
+//        }
 
-        Chat chat = new Chat();
-        chat.getElement().getStyle().set("width","100%").set("height","100%");
-        chat.setLoading(false);
-        chat.scrollToBottom();
-        chat.setMessages(messageList);
-        chat.setDebouncePeriod(200);
-        chat.setLazyLoadTriggerOffset(1000);
-//        chat.addLazyLoadTriggerEvent(2500);
-
-        chat.addChatNewMessageListener(event -> {
-            messageList.add(new Message(event.getMessage(), "SK", "Sharad Kodag", true));
-            chat.addNewMessage(new Message(event.getMessage(), "SK", "Sharad Kodag", true));
-//            chat.setMessages(messageList);
-            chat.scrollToBottom();
-        });
-
-        verticalLayout2.add(chat);
         verticalLayout1.add(textField, userGrid);
         horizontalLayout.add(verticalLayout1, verticalLayout2);
         return horizontalLayout;
-    }
-
-    public void onGridItemSelection(VerticalLayout verticalLayout, User user){
-        Label label = new Label(user.getFirstName() + " " + user.getLastName());
-        Grid<Messages> senderMessages = new Grid<>();
-        Grid<Messages> receiverMessages = new Grid<>();
-
-
-        label.setWidthFull();
-        label.getStyle().set("background-color","green");
-
     }
 }
